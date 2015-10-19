@@ -1,0 +1,5 @@
+SAY "Enter in your name: "
+ASK name
+SAY "Hello "
+SAYLN name
+SAYLN "It is nice to meet you."
