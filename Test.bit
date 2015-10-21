@@ -1,5 +1,9 @@
-SAY "Enter in your name: "
-ASK name
-SAY "Hello "
-SAYLN name
-SAYLN "It is nice to meet you."
+SAY "ENTER A NUMBER: "
+ASK num1
+
+SAY "ENTER ANOTHER NUMBER: "
+ASK num2
+
+IF EQU num1 num2 THEN
+	SAY "YOU ENTERED THE SAME NUMBER"
+ENDIF
