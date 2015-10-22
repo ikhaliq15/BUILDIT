@@ -16,6 +16,7 @@ string PRINT = "SAY";
 string PRINTLN = "SAYLN";
 string INPUT = "ASK";
 string ASSIGNMENT = "LET";
+string REASSIGNMENT = "CHANGE";
 string ADDITION = "ADD";
 string SUBTRACTION = "SUB";
 string MULTIPLICATION = "MULT";
@@ -28,6 +29,11 @@ string GREATERTHAN = "GRE";
 string LESSTHAN = "LESS";
 string GREATERTHANEQuAL = "GEQU";
 string LESSTHANEQUAL = "LEQU";
+string STRINGEQUAL = "SEQU";
+string NOTSTRINGEQUAL = "NSEQU";
+string WHILE = "WHILE";
+string WHILETHEN = "DO";
+string WHILEEND = "ENDWHILE";
 
 std::vector<std::string> toks;
 
@@ -58,7 +64,6 @@ template <typename T>
 	 return ss.str();
   }
 
-
 int varToInt(string var){
 	int indexOfVar = 0;
 	for(int j = 0; j < varNames.size(); j++){
@@ -79,6 +84,44 @@ int varToInt(string var){
 	}
 
 	return firstValue;
+}
+
+string varToString(string var){
+	int indexOfVar = 0;
+	for(int j = 0; j < varNames.size(); j++){
+		if(varNames[j] == var){
+			indexOfVar = j;
+			break;
+		}
+	}
+
+	string firstValue = "";
+
+	if(varValues[indexOfVar].substr(0, 6) == "STRING"){
+		string x = varValues[indexOfVar].substr(8, varValues[indexOfVar].length());
+		firstValue = x;;
+	}else if(varValues[indexOfVar].substr(0, 7) == "INTEGER"){
+		string x = varValues[indexOfVar].substr(8, varValues[indexOfVar].length());
+		firstValue = (x);
+	}
+
+	return firstValue;
+}
+
+bool checkStringConditional(string op, string first, string second){
+	if(op == "stringequal"){
+		if(first == second){
+			return true;
+		}else{
+			return false;
+		}
+	}else if(op == "notstringequal"){
+		if(first != second){
+			return true;
+		}else{
+			return false;
+		}
+	}
 }
 
 bool checkConditional(string op, int first, int second){
@@ -112,8 +155,19 @@ bool checkConditional(string op, int first, int second){
 		}else{
 			return false;
 		}
+	} 
+}
+
+int changeVariable(string name, string newValue){
+	int indexOfVar = 0;
+	for(int j = 0; j < varNames.size(); j++){
+		if(varNames[j] == name){
+			indexOfVar = j;
+			break;
+		}
 	}
 
+	varValues[indexOfVar] = newValue;
 }
 
 int doMath(string op, int first, int second){
@@ -162,6 +216,8 @@ void readFile(const char* filenombre)
 				curString = word + ' ';
 			}else if(word == ASSIGNMENT){
 				toks.push_back("assign");
+			}else if(word == REASSIGNMENT){
+				toks.push_back("reassign");
 			}else if(word == INPUT){
 				toks.push_back("input");
 			}else if(isDigits(word)){
@@ -190,6 +246,16 @@ void readFile(const char* filenombre)
 				toks.push_back("intgreaterequal");
 			}else if(word == LESSTHANEQUAL){
 				toks.push_back("intlessequal");
+			}else if(word == STRINGEQUAL){
+				toks.push_back("stringequal");
+			}else if(word == NOTSTRINGEQUAL){
+				toks.push_back("notstringequal");
+			}else if(word == WHILE){
+				toks.push_back("startwhile");
+			}else if(word == WHILETHEN){
+				toks.push_back("dowhile");
+			}else if(word == WHILEEND){
+				toks.push_back("endwhile");
 			}else{
 				toks.push_back("VAR " + word);
 			}
@@ -233,9 +299,11 @@ void parse()
 {
 	int i = 0;
 	bool doAction = true;
+	bool doWhileAction = true;
+	int startOfWhile = -21;
 
 	while( i < toks.size()){
-		if(doAction){
+		if(doAction && doWhileAction){
 			if(toks[i] == "print"){
 				if(toks[i + 1].substr(0, 7) == "STRING "){
 					string returnValue = toks[i + 1].substr(8);
@@ -323,7 +391,26 @@ void parse()
 			}else if(toks[i] == "ifend"){
 				doAction = true;
 			}else if(toks[i] == "if"){
-				if(toks[i+2].substr(0, 3) == "VAR" and toks[i+3].substr(0, 3) == "VAR"){
+				if(toks[i+1] == "stringequal"){
+					if(toks[i+2].substr(0, 3) == "VAR" and toks[i+3].substr(0, 3) == "VAR"){
+						string firstValue = varToString(toks[i+2]);
+						string secondValue = varToString(toks[i+3]);
+						doAction = checkStringConditional(toks[i+1], firstValue, secondValue);
+					}else if(toks[i+2].substr(0, 3) == "VAR" and toks[i+3].substr(0, 6) == "STRING"){
+						string firstValue = varToString(toks[i+2]);					
+						string secondValue = (toks[i+3].substr(8, toks[i+3].length()-1));
+						doAction = checkStringConditional(toks[i+1], firstValue, secondValue);
+					}else if(toks[i+3].substr(0, 3) == "VAR" and toks[i+2].substr(0, 6) == "STRING"){
+						string secondValue = varToString(toks[i+3]);					
+						string firstValue = (toks[i+2].substr(8, toks[i+2].length()-1));
+						doAction = checkStringConditional(toks[i+1], firstValue, secondValue);
+					}else if(toks[i+3].substr(0, 6) == "STRING" and toks[i+2].substr(0, 6) == "STRING"){
+						string firstValue = varToString(toks[i+2].substr(8, toks[i+2].length()-1));
+						string secondValue = varToString(toks[i+3].substr(8, toks[i+3].length()-1));
+						doAction = checkStringConditional(toks[i+1], firstValue, secondValue);
+					}
+				}else{
+					if(toks[i+2].substr(0, 3) == "VAR" and toks[i+3].substr(0, 3) == "VAR"){
 						int firstValue = varToInt(toks[i+2]);
 						int secondValue = varToInt(toks[i+3]);
 						doAction = checkConditional(toks[i+1], firstValue, secondValue);
@@ -340,13 +427,75 @@ void parse()
 						int secondValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
 						doAction = checkConditional(toks[i+1], firstValue, secondValue);
 					}
+				}
 				i += 4;
+			}else if(toks[i] == "reassign"){
+				if(toks[i+2] == "add" || toks[i+2] == "sub" || toks[i+2] == "mult" || toks[i+2] == "div"){
+					string newValue = toks[i+2];
+					if(toks[i+3].substr(0, 3) == "VAR" and toks[i+4].substr(0, 3) == "VAR"){
+						int firstValue = varToInt(toks[i+3]);
+						int secondValue = varToInt(toks[i+4]);
+						int answer = doMath(toks[i+2], firstValue, secondValue);
+						newValue = ("INTEGER " +  NumberToString(answer));
+						i += 2;
+					}else if(toks[i+3].substr(0, 3) == "VAR" and toks[i+4].substr(0, 7) == "INTEGER"){
+						int firstValue = varToInt(toks[i+3]);
+						int secondValue = stringToInt(toks[i+4].substr(8, toks[i+4].length()));
+						int answer = doMath(toks[i+2], firstValue, secondValue);
+						newValue = ("INTEGER " +  NumberToString(answer));
+						i += 2;
+					}else if(toks[i+4].substr(0, 3) == "VAR" and toks[i+3].substr(0, 7) == "INTEGER"){
+						int secondValue = varToInt(toks[i+4]);
+						int firstValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
+						int answer = doMath(toks[i+2], firstValue, secondValue);
+						newValue = ("INTEGER " +  NumberToString(answer));
+						i += 2;
+					}else if(toks[i+4].substr(0, 7) == "INTEGER" and toks[i+3].substr(0, 7) == "INTEGER"){
+						int firstValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
+						int secondValue = stringToInt(toks[i+4].substr(8, toks[i+4].length()));
+						int answer = doMath(toks[i+2], firstValue, secondValue);
+						newValue = ("INTEGER " +  NumberToString(answer));
+						i += 2;
+					}
+					changeVariable(toks[i+1], newValue);
+				}else{
+					changeVariable(toks[i+1], toks[i+2]);
+				}
+				i += 2;
+			}else if(toks[i] == "startwhile"){
+				if(toks[i+2].substr(0, 3) == "VAR" and toks[i+3].substr(0, 3) == "VAR"){
+					int firstValue = varToInt(toks[i+2]);
+					int secondValue = varToInt(toks[i+3]);
+					doWhileAction = checkConditional(toks[i+1], firstValue, secondValue-1);
+				}else if(toks[i+2].substr(0, 3) == "VAR" and toks[i+3].substr(0, 7) == "INTEGER"){
+					int firstValue = varToInt(toks[i+2]);					
+					int secondValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
+					doWhileAction = checkConditional(toks[i+1], firstValue, secondValue-1);
+				}else if(toks[i+3].substr(0, 3) == "VAR" and toks[i+2].substr(0, 7) == "INTEGER"){
+					int secondValue = varToInt(toks[i+3]);
+					int firstValue = stringToInt(toks[i+2].substr(8, toks[i+2].length()));
+					doWhileAction = checkConditional(toks[i+1], firstValue, secondValue-1);
+				}else if(toks[i+3].substr(0, 7) == "INTEGER" and toks[i+2].substr(0, 7) == "INTEGER"){
+					int firstValue = stringToInt(toks[i+2].substr(8, toks[i+2].length()));
+					int secondValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
+					doWhileAction = checkConditional(toks[i+1], firstValue, secondValue-1);
+				}
+				//cout << doWhileAction << endl;
+				startOfWhile = i-1;
+				i += 4;
+			}else if(toks[i] == "dowhile"){
+				//startOfWhile = i;
+			}else if(toks[i] == "endwhile"){
+				i = startOfWhile;
 			}else{
-				cerr << "Unkown Token: " + toks[i] << "\n";
+				cerr << "\n" << "Unkown Token: " + toks[i] << "\n";
 			}
 		}else{
-			if(toks[i] == "ifend"){
+			if(toks[i] == "ifend" && !doAction){
 				doAction = true;
+			}else if(toks[i] == "endwhile" && !doWhileAction){
+				doWhileAction = true;
+				startOfWhile = -23;
 			}
 		}
 		i++;
