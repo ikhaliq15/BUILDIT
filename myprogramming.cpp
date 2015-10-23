@@ -34,6 +34,8 @@ string NOTSTRINGEQUAL = "NSEQU";
 string WHILE = "WHILE";
 string WHILETHEN = "DO";
 string WHILEEND = "ENDWHILE";
+string STARTCOMMENT = "SC";
+string ENDCOMMENT = "EC";
 
 std::vector<std::string> toks;
 
@@ -256,6 +258,10 @@ void readFile(const char* filenombre)
 				toks.push_back("dowhile");
 			}else if(word == WHILEEND){
 				toks.push_back("endwhile");
+			}else if(word == STARTCOMMENT){
+				while(words[i] != ENDCOMMENT){
+					i ++;
+				}
 			}else{
 				toks.push_back("VAR " + word);
 			}
@@ -330,7 +336,7 @@ void parse()
 			}else if(toks[i] == "println"){
 				if(toks[i + 1].substr(0, 7) == "STRING "){
 					string returnValue = toks[i + 1].substr(8);
-					cout << returnValue.substr(0, returnValue.length()-1) << "\n";
+					cout << returnValue.substr(0, returnValue.length()-1) << endl;
 				}else if(toks[i + 1].substr(0, 3) == "VAR"){
 					int indexOfVar = 0;
 					for(int j = 0; j < varNames.size(); j++){
@@ -341,13 +347,13 @@ void parse()
 					}
 					if(varValues[indexOfVar].substr(0, 7) == "STRING "){
 						string returnValue = varValues[indexOfVar].substr(8);
-						cout << returnValue.substr(0, returnValue.length()-1) << "\n";
+						cout << returnValue.substr(0, returnValue.length()-1) << endl;
 					}else if(varValues[indexOfVar].substr(0, 7) == "INTEGER"){
 						string returnValue = varValues[indexOfVar].substr(8);
-						cout << returnValue.substr(0, returnValue.length()) << "\n";
+						cout << returnValue.substr(0, returnValue.length()) << endl;
 					}  
 				}else if(toks[i + 1].substr(0, 7) == "INTEGER"){
-					cout << toks[i+1].substr(8, toks[i+1].length()) << "\n";
+					cout << toks[i+1].substr(8, toks[i+1].length()) << endl;
 				}
 				i++;
 			}else if(toks[i] == "input"){
