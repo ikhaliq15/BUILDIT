@@ -4,6 +4,7 @@ ASK num1
 SAY "ENTER ANOTHER NUMBER: "
 ASK num2
 
+SC This is a comment. It is ignored by the interperter. EC
 IF EQU num1 num2 THEN
 	SAYLN "YOU ENTERED THE SAME NUMBER"
 ENDIF
