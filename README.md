@@ -7,5 +7,9 @@ v1.0
 v1.3.2
 	- CRITICAL UPDATE! Support for numbers and math.
 	- CRITICAL UPDATE! Support for If statements
-	- Released source code (No Comments Yet :( )!
+	- Released source code
 	- Made interperter more efficient.
+
+v1.5.1
+	- Now support for while loops
+	- Also string comparrisons now
