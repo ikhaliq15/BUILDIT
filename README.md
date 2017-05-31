@@ -16,3 +16,10 @@ v1.5.1
 
 v1.7.2
 	- Now supports commenting your code. Enjoy!
+
+TODO LIST:
+	- Add more examples
+	- Add more functions
+	- Add function definition
+	- Add file writing capabilities
+	- Add better string functions

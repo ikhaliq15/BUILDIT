@@ -1,0 +1,20 @@
+SAY "ENTER A NUMBER: "
+ASK num
+
+LET tOne 0
+LET tTwo 0
+WHILE NEQU num 1 DO
+	SAYLN num
+	CHANGE tOne ADD num 0
+	CHANGE tTwo DIV num 2
+	CHANGE tTwo MULT tTwo 2
+	CHANGE tTwo SUB tOne tTwo
+	IF EQU tTwo 0 THEN
+		CHANGE num DIV num 2
+	ENDIF
+	IF EQU tTwo 1 THEN
+		CHANGE num MULT num 3
+		CHANGE num ADD num 1
+	ENDIF
+ENDWHILE
+SAYLN num

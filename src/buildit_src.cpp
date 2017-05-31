@@ -25,6 +25,7 @@ string IF = "IF";
 string THEN = "THEN";
 string END = "ENDIF";
 string EQUAL = "EQU";
+string NOTEQUAL = "NEQU";
 string GREATERTHAN = "GRE";
 string LESSTHAN = "LESS";
 string GREATERTHANEQuAL = "GEQU";
@@ -55,6 +56,7 @@ int stringToInt(const string &str) {
 	ss << str;
 	int value;
 	ss >> value;
+	//cout << "INPUT: " << str << ", OUTPUT: " << value << endl;
 	return value;
 }
 
@@ -133,8 +135,15 @@ bool checkConditional(string op, int first, int second){
 		}else{
 			return false;
 		}
+	}else if (op == "intnotequal"){
+		if(first != second){
+			return true;
+		}else{
+			return false;
+		}
 	}else if(op == "intgreater"){
 		if(first > second){
+			//cout << "FIRST: " << first << ", SECOND: " << second <<"! GREATER TRUE!" << endl;
 			return true;
 		}else{
 			return false;
@@ -168,7 +177,6 @@ int changeVariable(string name, string newValue){
 			break;
 		}
 	}
-
 	varValues[indexOfVar] = newValue;
 }
 
@@ -240,6 +248,8 @@ void readFile(const char* filenombre)
 				toks.push_back("ifend");
 			}else if(word == EQUAL){
 				toks.push_back("intequal");
+			}else if (word == NOTEQUAL){
+				toks.push_back("intnotequal");
 			}else if(word == GREATERTHAN){
 				toks.push_back("intgreater");
 			}else if(word == LESSTHAN){
@@ -443,27 +453,30 @@ void parse()
 						int secondValue = varToInt(toks[i+4]);
 						int answer = doMath(toks[i+2], firstValue, secondValue);
 						newValue = ("INTEGER " +  NumberToString(answer));
-						i += 2;
+						//i += 2;
 					}else if(toks[i+3].substr(0, 3) == "VAR" and toks[i+4].substr(0, 7) == "INTEGER"){
 						int firstValue = varToInt(toks[i+3]);
 						int secondValue = stringToInt(toks[i+4].substr(8, toks[i+4].length()));
 						int answer = doMath(toks[i+2], firstValue, secondValue);
 						newValue = ("INTEGER " +  NumberToString(answer));
-						i += 2;
+						//i += 2;
 					}else if(toks[i+4].substr(0, 3) == "VAR" and toks[i+3].substr(0, 7) == "INTEGER"){
 						int secondValue = varToInt(toks[i+4]);
 						int firstValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
 						int answer = doMath(toks[i+2], firstValue, secondValue);
 						newValue = ("INTEGER " +  NumberToString(answer));
-						i += 2;
+						//i += 2;
 					}else if(toks[i+4].substr(0, 7) == "INTEGER" and toks[i+3].substr(0, 7) == "INTEGER"){
 						int firstValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
 						int secondValue = stringToInt(toks[i+4].substr(8, toks[i+4].length()));
 						int answer = doMath(toks[i+2], firstValue, secondValue);
 						newValue = ("INTEGER " +  NumberToString(answer));
-						i += 2;
+						//i += 2;
 					}
-					changeVariable(toks[i+1], newValue);
+					//cout << "NEW VALUE OF " << toks[i+1] << " IS " << newValue << "!" << endl;
+					changeVariable(toks[i+1], newValue);\
+					i += 2;
+					//testVars();
 				}else{
 					changeVariable(toks[i+1], toks[i+2]);
 				}
@@ -472,19 +485,20 @@ void parse()
 				if(toks[i+2].substr(0, 3) == "VAR" and toks[i+3].substr(0, 3) == "VAR"){
 					int firstValue = varToInt(toks[i+2]);
 					int secondValue = varToInt(toks[i+3]);
-					doWhileAction = checkConditional(toks[i+1], firstValue, secondValue-1);
+					doWhileAction = checkConditional(toks[i+1], firstValue, secondValue);
 				}else if(toks[i+2].substr(0, 3) == "VAR" and toks[i+3].substr(0, 7) == "INTEGER"){
-					int firstValue = varToInt(toks[i+2]);					
+					int firstValue = varToInt(toks[i+2]);
+					//cout << "SECOND VALUE AS NUMBER: " << toks[i+3].substr(8, toks[i+3].length()) << endl;
 					int secondValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
-					doWhileAction = checkConditional(toks[i+1], firstValue, secondValue-1);
+					doWhileAction = checkConditional(toks[i+1], firstValue, secondValue);
 				}else if(toks[i+3].substr(0, 3) == "VAR" and toks[i+2].substr(0, 7) == "INTEGER"){
 					int secondValue = varToInt(toks[i+3]);
 					int firstValue = stringToInt(toks[i+2].substr(8, toks[i+2].length()));
-					doWhileAction = checkConditional(toks[i+1], firstValue, secondValue-1);
+					doWhileAction = checkConditional(toks[i+1], firstValue, secondValue);
 				}else if(toks[i+3].substr(0, 7) == "INTEGER" and toks[i+2].substr(0, 7) == "INTEGER"){
 					int firstValue = stringToInt(toks[i+2].substr(8, toks[i+2].length()));
 					int secondValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
-					doWhileAction = checkConditional(toks[i+1], firstValue, secondValue-1);
+					doWhileAction = checkConditional(toks[i+1], firstValue, secondValue);
 				}
 				//cout << doWhileAction << endl;
 				startOfWhile = i-1;
@@ -510,8 +524,8 @@ void parse()
 
 int main ( int argc, char *argv[] )
 {
-  if ( argc != 2 )
-	cout<<"usage: "<< argv[0] <<" <filename>\n";
+  if ( argc != 2 && argc != 3)
+	cout<<"usage: "<< argv[0] <<" <filename> [-d]\n";
   else {
 	ifstream the_file ( argv[1] );
 	if ( !the_file.is_open() )
@@ -519,6 +533,12 @@ int main ( int argc, char *argv[] )
 	} 
 
   readFile(argv[1]);
-  //testLexer();
+
+  for (int i = 0; i < argc; i++){
+  	std::string t = argv[i];
+  	if (t == "-d") {
+  		testLexer();
+  	}
+   }
   parse();
 }
