@@ -1,1 +1,12 @@
-TODO
+Usage of BUILDIT Command
+
+Main Command: buildit [filename] [-d]
+
+Explanations:
+  filename: Location of your buildit file. Path can be relative or direct.
+  
+ Options:
+  d: This command prints out a the tokens after they have gone through the lexer. Use this if code is not running like expected and paste it in your issue on github.com
+  
+Questions?
+  Open an issue at https://www.github.com/ikhaliq15/BUILDIT
