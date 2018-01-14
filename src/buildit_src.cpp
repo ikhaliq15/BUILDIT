@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <locale>
 #include <cmath>
+#include <ctime>
 
 using namespace std;
 
@@ -22,6 +23,9 @@ string SUBTRACTION = "SUB";
 string MULTIPLICATION = "MULT";
 string DIVISION = "DIV";
 string SQRT = "SQRT";
+string CASTTOSTRING = "TOSTRING";
+string CASTTOINT = "TONUM";
+string RANDOMINT = "RANDINT";
 string IF = "IF";
 string THEN = "THEN";
 string END = "ENDIF";
@@ -187,6 +191,10 @@ int changeVariable(string name, string newValue){
 	varValues[indexOfVar] = newValue;
 }
 
+int randintinrange(int min, int max) {
+    return (rand()%(max-min+1)) + min;
+}
+
 int doMath(string op, int first, int second){
 	int answer = 0;
 
@@ -198,6 +206,8 @@ int doMath(string op, int first, int second){
 		answer = (first * second);
 	}else if(op == "div"){
 		answer = (first / second); 
+	}else if(op == "randomint"){
+		answer = randintinrange(first, second);
 	}
 
 	return answer;
@@ -229,7 +239,7 @@ void readFile(const char* filenombre)
 			}else if(word == PRINTLN){
 				toks.push_back("println");
 			}else if(word.at(0) == '\"'){
-				if(word.at(word.length()-1) == '\"'){
+				if(word.at(word.length()-1) == '\"' and word != "\""){
 					inString = false;
 					curString = curString + word;
 					toks.push_back("STRING " + curString);
@@ -256,6 +266,8 @@ void readFile(const char* filenombre)
 				toks.push_back("div");
 			}else if (word == SQRT){
 				toks.push_back("sqrt");
+			}else if (word == RANDOMINT) {
+				toks.push_back("randomint");
 			}else if(word == IF){
 				toks.push_back("if");
 			}else if(word == THEN){
@@ -298,6 +310,10 @@ void readFile(const char* filenombre)
 				toks.push_back("gotomarker");
 				toks.push_back(words[i + 1]);
 				i++;
+			}else if (word == CASTTOINT) {
+				toks.push_back("casttoint");
+			}else if (word == CASTTOSTRING) {
+				toks.push_back("casttostring");
 			}else{
 				toks.push_back("VAR " + word);
 			}
@@ -380,6 +396,10 @@ std::vector<std::string> getConditionalValue(std::vector<std::string> tokens, in
 	moveOver += 4;
 	output.push_back(NumberToString(moveOver));
 	return output;
+} 
+
+bool isMathOperator(string x) {
+	return x == "add" || x == "sub" || x == "mult" || x == "div" || x == "randomint";
 }
 
 void testLexer(){
@@ -408,6 +428,17 @@ void parse()
 	bool doAction = true;
 	bool doWhileAction = true;
 	int startOfWhile = -21;
+
+	while (i < toks.size()) {
+		if (toks[i] == "createmarker"){
+			markerNames.push_back(toks[i+1]);
+			i++;
+			markerLocations.push_back(i);
+		}
+		i++;
+	}
+
+	i=0;
 
 	while( i < toks.size()){
 		if(doAction && doWhileAction){
@@ -474,7 +505,7 @@ void parse()
 				i++;
 			}else if(toks[i] == "assign"){
 				varNames.push_back(toks[i+1]);
-				if(toks[i+2] == "add" || toks[i+2] == "sub" || toks[i+2] == "mult" || toks[i+2] == "div"){
+				if(isMathOperator(toks[i+2])) {
 					if(toks[i+3].substr(0, 3) == "VAR" and toks[i+4].substr(0, 3) == "VAR"){
 						int firstValue = varToInt(toks[i+3]);
 						int secondValue = varToInt(toks[i+4]);
@@ -507,6 +538,25 @@ void parse()
 						varValues.push_back("INTEGER " + NumberToString(sqrt(stringToInt(toks[i+3].substr(8, toks[i+3].length())))));
 					}
 					i += 1;
+				}else if (toks[i+2] == "casttostring") {
+					if(toks[i+3].substr(0,3) == "VAR"){
+						//cout << "STRING \"" + varToString(toks[i+3]) << endl;
+						varValues.push_back("STRING \"" + NumberToString(varToInt(toks[i+3])) + "\"");
+					}else if (toks[i+3].substr(0, 7) == "INTEGER"){
+						varValues.push_back("STRING \"" + toks[i+3].substr(8) + "\"");
+					}else if (toks[i+3].substr(0, 6) == "STRING") {
+						varValues.push_back(toks[i+3]);
+					}
+					i += 1;
+				}else if (toks[i+2] == "casttoint") {	
+					if(toks[i+3].substr(0,3) == "VAR"){
+						varValues.push_back("INTEGER " + NumberToString(varToInt(toks[i+3])));
+					}else if (toks[i+3].substr(0, 7) == "INTEGER"){
+						varValues.push_back(toks[i+3]);
+					}else if (toks[i+3].substr(0, 6) == "STRING") {
+						varValues.push_back("INTEGER " + toks[i+3].substr(8, toks[i+3].length()));
+					}
+					i += 1;
 				}else{
 					varValues.push_back(toks[i+2]);
 				}
@@ -519,7 +569,7 @@ void parse()
 				doAction = StringToBool(v[0]);
 				i += stringToInt(v[1]);
 			}else if(toks[i] == "reassign"){
-				if(toks[i+2] == "add" || toks[i+2] == "sub" || toks[i+2] == "mult" || toks[i+2] == "div"){
+				if(isMathOperator(toks[i+2])){
 					string newValue = toks[i+2];
 					if(toks[i+3].substr(0, 3) == "VAR" and toks[i+4].substr(0, 3) == "VAR"){
 						int firstValue = varToInt(toks[i+3]);
@@ -561,6 +611,36 @@ void parse()
 						}
 					}
 					i += 1;
+				}else if (toks[i+2] == "casttoint") {
+					string newValue = "";	
+					if(toks[i+3].substr(0,3) == "VAR"){
+						newValue = ("INTEGER " + NumberToString(varToInt(toks[i+3])));
+					}else if (toks[i+3].substr(0, 7) == "INTEGER"){
+						newValue = (toks[i+3]);
+					}else if (toks[i+3].substr(0, 6) == "STRING") {
+						newValue = ("INTEGER " + toks[i+3].substr(8, toks[i+3].length()));
+					}
+					for (int j = 0; j < varNames.size(); j++) {
+						if (varNames[j] == toks[i + 1]) {
+							varValues[j] = newValue;
+						}
+					}
+					i += 1;
+				}else if (toks[i+2] == "casttostring") {
+					string newValue = "";
+					if(toks[i+3].substr(0,3) == "VAR"){
+						newValue = ("STRING \"" + NumberToString(varToInt(toks[i+3])) + "\"");
+					}else if (toks[i+3].substr(0, 7) == "INTEGER"){
+						newValue = ("STRING \"" + toks[i+3].substr(8) + "\"");
+					}else if (toks[i+3].substr(0, 6) == "STRING") {
+						newValue = (toks[i+3]);
+					}
+					for (int j = 0; j < varNames.size(); j++) {
+						if (varNames[j] == toks[i + 1]) {
+							varValues[j] = newValue;
+						}
+					}
+					i += 1;
 				}else{
 					changeVariable(toks[i+1], toks[i+2]);
 				}
@@ -577,9 +657,7 @@ void parse()
 			}else if (toks[i] == "breakloop"){
 				doWhileAction = false;
 			}else if (toks[i] == "createmarker"){
-				markerNames.push_back(toks[i+1]);
 				i++;
-				markerLocations.push_back(i);
 			}else if (toks[i] == "gotomarker") {
 				int location = 0;
 				for (int j = 0; j < markerNames.size(); j++) {
@@ -605,6 +683,7 @@ void parse()
 
 int main ( int argc, char *argv[] )
 {
+	srand(time(NULL));
   if ( argc != 2 && argc != 3)
 	cout<<"usage: "<< argv[0] <<" <filename> [-d]" << endl;
   else {

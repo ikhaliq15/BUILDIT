@@ -1,0 +1,36 @@
+LET num RANDINT 0 1000
+
+SAYLN "Guess a number between 0 and 1000!"
+
+LET guess 0
+LET attempts_left 10
+
+WHILE NEQU guess num DO
+	SAY "> "
+	ASK guess
+	CHANGE guess TONUM guess
+	IF GRE guess num THEN
+		SAY "Too high. "
+	ENDIF
+	IF LESS guess num THEN
+		SAY "Too low. "
+	ENDIF
+	CHANGE attempts_left SUB attempts_left 1
+	IF GRE attempts_left 1 THEN
+		SAY "You have "
+		SAY attempts_left
+		SAYLN " guesses remaining."
+	ENDIF
+	IF LESS attempts_left 2 THEN
+		SAYLN ""
+		GOTOMARKER lose
+	ENDIF
+ENDWHILE
+
+SAYLN "Correct! Nice Job."
+GOTOMARKER end
+
+SETMARKER lose
+SAYLN "You lose!"
+
+SETMARKER end
