@@ -1,1 +1,50 @@
+The first important ting to know about BuildIT's syntax is that it doesn't use symbols suchas =, +, -, *, and /. Instead it uses commands, followed by parameters. For example, to add 2 and 2, instead of 2 + 2, you use ADD 2 2.
 
+Below is the documentation for the commands usable in BuildIt.
+
+
+Commands
+
+SAY
+Parameters - 1 (String or Integer)
+Description - Prints out to the screen the first parameter.
+
+SAYLN
+Parameters - 1 (String or Integer)
+Description - Prints out to the screen the first parameter, followed by "\n" (new line).
+
+ASK
+Parameters - 1 (Name of Variable)
+Description - Prompts user for input and stores it in variable defined by the first parameter.
+
+LET
+Parameters - At least 2 (Name of Variable, Value)
+Description - Creates variable, named through the first parameter, and gives it the value of the second parameter. The second parameter can use modifiers, such as mathematical operators.
+
+CHANGE
+Parameters - At least 2 (Name of Variable, Value)
+Description - Modifies existing variable, named through the first parameter, and gives it a value of the second parameter. The second parameter can use modifiers, such as mathematical operators.
+
+SC
+Parameters - None
+Description - Begins comment mode. All text in comment mode is not executed. Comment mode does not end until the EC command is executed.
+
+EC
+Parameters - None
+Description - Begins comment mode. All text in comment mode is not executed. Comment mode begins in until the SC command is executed.
+
+WHILE/ENDWHILE
+Parameters - 1 (Boolean)
+Description - Repeats the code from 'DO' to 'ENDWHILE', so long as the the boolean give in parameter 1 stays true. 
+
+LEAVE
+Parameters - None
+Description - Immeadiately leaves any loops that are being executed.
+
+SETMARKER
+Parameters - 1 (Name of Marker)
+Description - Creates a marking point in the code with the name given in parameter 1. This markers can later be referenced with the GOTOMARKER command.
+
+GOTOMARKER
+Parameters - 1 (Name of Marker)
+Description - Goes to an existing marking point, named by parameter 1. All markers are generated before the code is executed, so therefore, you can go to a marker that isn't technically created yet.
