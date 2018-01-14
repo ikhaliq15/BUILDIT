@@ -1,0 +1,38 @@
+SAYLN "1) I know both legs."
+SAYLN "2) I know one leg and a hypotenuse."
+
+SAY "Select one of the options above: "
+ASK option
+
+IF SEQU option "1" THEN
+	SAY "Enter the first leg: " 
+	ASK leg1
+
+	SAY "Enter the second leg: "
+	ASK leg2
+
+	CHANGE leg1 MULT leg1 leg1
+	CHANGE leg2 MULT leg2 leg2
+
+	LET hyp ADD leg1 leg2
+	CHANGE hyp SQRT hyp
+
+	SAY "The hypotenuse is "
+	SAYLN hyp
+ENDIF
+IF SEQU option "2" THEN
+	SAY "Enter the leg: "
+	ASK leg1
+
+	SAY "Enter the hypotenuse: "
+	ASK hyp
+
+	CHANGE leg1 MULT leg1 leg1
+	CHANGE hyp MULT hyp hyp
+
+	LET leg2 SUB hyp leg1
+	CHANGE leg2 SQRT leg2
+
+	SAY "The other leg is "
+	SAYLN leg2
+ENDIF
