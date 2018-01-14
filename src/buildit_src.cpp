@@ -319,13 +319,13 @@ void readFile(const char* filenombre)
 
 void testLexer(){
 	//Testing the lexer
-	cout << "Num Toks: " << toks.size() << "\n";
+	cout << "Num Toks: " << toks.size() << endl;
 	
 	for(int i = 0; i <= toks.size()-1;i++){
-		cout << toks[i] << "\n";
+		cout << toks[i] << endl;
 	}
 
-	cout << "\n\n";
+	cout << endl << endl;
 }
 
 void testVars(){
@@ -578,7 +578,7 @@ void parse()
 				}
 				i = markerLocations[location];
 			}else{
-				cerr << "\n" << "Unkown Token: " + toks[i] << "\n";
+				cerr << endl << "Unkown Token: " + toks[i] << endl;
 			}
 		}else{
 			if(toks[i] == "ifend" && !doAction){
@@ -595,11 +595,11 @@ void parse()
 int main ( int argc, char *argv[] )
 {
   if ( argc != 2 && argc != 3)
-	cout<<"usage: "<< argv[0] <<" <filename> [-d]\n";
+	cout<<"usage: "<< argv[0] <<" <filename> [-d]" << endl;
   else {
 	ifstream the_file ( argv[1] );
 	if ( !the_file.is_open() )
-	  cout<<"Could not open file\n";
+	  cout<<"Could not open file" << endl;
 	} 
 
   readFile(argv[1]);
