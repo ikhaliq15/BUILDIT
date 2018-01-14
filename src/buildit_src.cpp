@@ -317,6 +317,71 @@ void readFile(const char* filenombre)
 
 }
 
+inline const char * const BoolToString(bool b) {
+	return b ? "true" : "false";
+}
+
+bool StringToBool(string s) {
+	if (s == "true") {
+		return true;
+	}
+	return false;
+}
+
+bool checkIfDataIs(string x, string type) {
+	if (x.length() >= type.length()) {
+		return x.substr(0, type.length()) == type;
+	}
+	return false;
+}
+
+
+std::vector<std::string> getConditionalValue(std::vector<std::string> tokens, int position){
+	std::vector<std::string> output;
+
+	int moveOver = 0;
+	if(tokens[position+1] == "stringequal" || tokens[position+1] == "notstringequal"){
+		if(checkIfDataIs(tokens[position+2], "VAR") and checkIfDataIs(tokens[position+3], "VAR")){
+			string firstValue = varToString(tokens[position+2]);
+			string secondValue = varToString(tokens[position+3]);
+			output.push_back(BoolToString(checkStringConditional(tokens[position+1], firstValue, secondValue)));
+		}else if(checkIfDataIs(tokens[position+2], "VAR") and checkIfDataIs(tokens[position+3], "STRING")){
+			string firstValue = varToString(tokens[position+2]);					
+			string secondValue = (tokens[position+3].substr(8, tokens[position+3].length()-1));
+			output.push_back(BoolToString(checkStringConditional(tokens[position+1], firstValue, secondValue)));
+		}else if(tokens[position+3].substr(0, 3) == "VAR" and checkIfDataIs(tokens[position+2], "STRING")){
+			string secondValue = varToString(tokens[position+3]);					
+			string firstValue = (tokens[position+2].substr(8, tokens[position+2].length()-1));
+			output.push_back(BoolToString(checkStringConditional(tokens[position+1], firstValue, secondValue)));
+		}else if(checkIfDataIs(tokens[position+3], "STRING") and checkIfDataIs(tokens[position+2], "STRING")){
+			string firstValue = varToString(tokens[position+2].substr(8, tokens[position+2].length()-1));
+			string secondValue = varToString(tokens[position+3].substr(8, tokens[position+3].length()-1));
+			output.push_back(BoolToString(checkStringConditional(tokens[position+1], firstValue, secondValue)));
+		}
+	}else{
+		if(checkIfDataIs(tokens[position+2], "VAR") and checkIfDataIs(tokens[position+3], "VAR")){
+			int firstValue = varToInt(tokens[position+2]);
+			int secondValue = varToInt(tokens[position+3]);
+			output.push_back(BoolToString(checkConditional(tokens[position+1], firstValue, secondValue)));
+		}else if(checkIfDataIs(tokens[position+2], "VAR") and checkIfDataIs(tokens[position+3], "INTEGER")){
+			int firstValue = varToInt(tokens[position+2]);					
+			int secondValue = stringToInt(tokens[position+3].substr(8, tokens[position+3].length()));
+			output.push_back(BoolToString(checkConditional(tokens[position+1], firstValue, secondValue)));
+		}else if(checkIfDataIs(tokens[position+3], "VAR") and checkIfDataIs(tokens[position+2], "INTEGER")){
+			int secondValue = varToInt(tokens[position+3]);
+			int firstValue = stringToInt(tokens[position+2].substr(8, tokens[position+2].length()));
+			output.push_back(BoolToString(checkConditional(tokens[position+1], firstValue, secondValue)));
+		}else if(checkIfDataIs(tokens[position+3], "INTEGER") and checkIfDataIs(tokens[position+3], "INTEGER")){
+			int firstValue = stringToInt(tokens[position+2].substr(8, tokens[position+2].length()));
+			int secondValue = stringToInt(tokens[position+3].substr(8, tokens[position+3].length()));
+			output.push_back(BoolToString(checkConditional(tokens[position+1], firstValue, secondValue)));
+		}
+	}
+	moveOver += 4;
+	output.push_back(NumberToString(moveOver));
+	return output;
+}
+
 void testLexer(){
 	//Testing the lexer
 	cout << "Num Toks: " << toks.size() << endl;
@@ -450,45 +515,9 @@ void parse()
 			}else if(toks[i] == "ifend"){
 				doAction = true;
 			}else if(toks[i] == "if"){
-				if(toks[i+1] == "stringequal" || toks[i+1] == "notstringequal"){
-					if(toks[i+2].substr(0, 3) == "VAR" and toks[i+3].substr(0, 3) == "VAR"){
-						string firstValue = varToString(toks[i+2]);
-						string secondValue = varToString(toks[i+3]);
-						doAction = checkStringConditional(toks[i+1], firstValue, secondValue);
-					}else if(toks[i+2].substr(0, 3) == "VAR" and toks[i+3].substr(0, 6) == "STRING"){
-						string firstValue = varToString(toks[i+2]);					
-						string secondValue = (toks[i+3].substr(8, toks[i+3].length()-1));
-						doAction = checkStringConditional(toks[i+1], firstValue, secondValue);
-					}else if(toks[i+3].substr(0, 3) == "VAR" and toks[i+2].substr(0, 6) == "STRING"){
-						string secondValue = varToString(toks[i+3]);					
-						string firstValue = (toks[i+2].substr(8, toks[i+2].length()-1));
-						doAction = checkStringConditional(toks[i+1], firstValue, secondValue);
-					}else if(toks[i+3].substr(0, 6) == "STRING" and toks[i+2].substr(0, 6) == "STRING"){
-						string firstValue = varToString(toks[i+2].substr(8, toks[i+2].length()-1));
-						string secondValue = varToString(toks[i+3].substr(8, toks[i+3].length()-1));
-						cout << toks[i+1] << ", " << firstValue << ", " << secondValue << endl;
-						doAction = checkStringConditional(toks[i+1], firstValue, secondValue);
-					}
-				}else{
-					if(toks[i+2].substr(0, 3) == "VAR" and toks[i+3].substr(0, 3) == "VAR"){
-						int firstValue = varToInt(toks[i+2]);
-						int secondValue = varToInt(toks[i+3]);
-						doAction = checkConditional(toks[i+1], firstValue, secondValue);
-					}else if(toks[i+2].substr(0, 3) == "VAR" and toks[i+3].substr(0, 7) == "INTEGER"){
-						int firstValue = varToInt(toks[i+2]);					
-						int secondValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
-						doAction = checkConditional(toks[i+1], firstValue, secondValue);
-					}else if(toks[i+3].substr(0, 3) == "VAR" and toks[i+2].substr(0, 7) == "INTEGER"){
-						int secondValue = varToInt(toks[i+3]);
-						int firstValue = stringToInt(toks[i+2].substr(8, toks[i+2].length()));
-						doAction = checkConditional(toks[i+1], firstValue, secondValue);
-					}else if(toks[i+3].substr(0, 7) == "INTEGER" and toks[i+2].substr(0, 7) == "INTEGER"){
-						int firstValue = stringToInt(toks[i+2].substr(8, toks[i+2].length()));
-						int secondValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
-						doAction = checkConditional(toks[i+1], firstValue, secondValue);
-					}
-				}
-				i += 4;
+				std::vector<string> v = getConditionalValue(toks, i);
+				doAction = StringToBool(v[0]);
+				i += stringToInt(v[1]);
 			}else if(toks[i] == "reassign"){
 				if(toks[i+2] == "add" || toks[i+2] == "sub" || toks[i+2] == "mult" || toks[i+2] == "div"){
 					string newValue = toks[i+2];
@@ -530,7 +559,6 @@ void parse()
 								varValues[j] = "INTEGER " + NumberToString(sqrt(stringToInt(toks[i+3].substr(8, toks[i+3].length()))));
 							}
 						}
-						//changeVariable(toks[i+1], "INTEGER " + NumberToString(sqrt(stringToInt(toks[i+3].substr(8, toks[i+3].length())))));
 					}
 					i += 1;
 				}else{
@@ -538,27 +566,10 @@ void parse()
 				}
 				i += 2;
 			}else if(toks[i] == "startwhile"){
-				if(toks[i+2].substr(0, 3) == "VAR" and toks[i+3].substr(0, 3) == "VAR"){
-					int firstValue = varToInt(toks[i+2]);
-					int secondValue = varToInt(toks[i+3]);
-					doWhileAction = checkConditional(toks[i+1], firstValue, secondValue);
-				}else if(toks[i+2].substr(0, 3) == "VAR" and toks[i+3].substr(0, 7) == "INTEGER"){
-					int firstValue = varToInt(toks[i+2]);
-					//cout << "SECOND VALUE AS NUMBER: " << toks[i+3].substr(8, toks[i+3].length()) << endl;
-					int secondValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
-					doWhileAction = checkConditional(toks[i+1], firstValue, secondValue);
-				}else if(toks[i+3].substr(0, 3) == "VAR" and toks[i+2].substr(0, 7) == "INTEGER"){
-					int secondValue = varToInt(toks[i+3]);
-					int firstValue = stringToInt(toks[i+2].substr(8, toks[i+2].length()));
-					doWhileAction = checkConditional(toks[i+1], firstValue, secondValue);
-				}else if(toks[i+3].substr(0, 7) == "INTEGER" and toks[i+2].substr(0, 7) == "INTEGER"){
-					int firstValue = stringToInt(toks[i+2].substr(8, toks[i+2].length()));
-					int secondValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
-					doWhileAction = checkConditional(toks[i+1], firstValue, secondValue);
-				}
-				//cout << doWhileAction << endl;
+				std::vector<string> v = getConditionalValue(toks, i);
+				doWhileAction = StringToBool(v[0]);
 				startOfWhile = i-1;
-				i += 4;
+				i += stringToInt(v[1]);
 			}else if(toks[i] == "dowhile"){
 				//startOfWhile = i;
 			}else if(toks[i] == "endwhile"){
