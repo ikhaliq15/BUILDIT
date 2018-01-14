@@ -1,0 +1,10 @@
+How To Install Buildit On Your System
+
+Windows
+  Use the executable in the bin\win directory to run your command
+
+Mac OSX
+  Use the executable in the bin\osx directory to run your command
+  
+Questions?
+  Open an issue at https://www.github.com/ikhaliq15/BUILDIT
