@@ -17,4 +17,5 @@ WHILE NEQU num 1 DO
 		CHANGE num ADD num 1
 	ENDIF
 ENDWHILE
+
 SAYLN num

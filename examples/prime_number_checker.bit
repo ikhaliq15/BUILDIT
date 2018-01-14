@@ -1,0 +1,27 @@
+SAY "ENTER A NUMBER: "
+ASK n
+
+LET tOne 0
+LET tTwo 0
+LET isPrime 1
+LET sqrtN SQRT n
+LET counter 2
+
+WHILE LEQU counter sqrtN DO
+	CHANGE tOne ADD num 0
+	CHANGE tTwo DIV num counter
+	CHANGE tTwo MULT tTwo counter
+	CHANGE tTwo SUB tOne tTwo
+	IF EQU tTwo 0 THEN
+		CHANGE isPrime 0
+		LEAVE
+	ENDIF
+	CHANGE counter ADD counter 1
+ENDWHILE
+
+IF EQU isPrime 0 THEN
+	SAYLN "YOUR NUMBER IS NOT PRIME!"
+ENDIF
+IF EQU isPrime 1 THEN
+	SAYLN "YOUR NUMBER IS PRIME!"
+ENDIF

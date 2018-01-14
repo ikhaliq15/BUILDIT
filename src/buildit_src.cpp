@@ -6,7 +6,7 @@
 #include <sstream>
 #include <iomanip>
 #include <locale>
-
+#include <cmath>
 
 using namespace std;
 
@@ -21,6 +21,7 @@ string ADDITION = "ADD";
 string SUBTRACTION = "SUB";
 string MULTIPLICATION = "MULT";
 string DIVISION = "DIV";
+string SQRT = "SQRT";
 string IF = "IF";
 string THEN = "THEN";
 string END = "ENDIF";
@@ -35,13 +36,19 @@ string NOTSTRINGEQUAL = "NSEQU";
 string WHILE = "WHILE";
 string WHILETHEN = "DO";
 string WHILEEND = "ENDWHILE";
+string BREAKLOOP = "LEAVE";
 string STARTCOMMENT = "SC";
 string ENDCOMMENT = "EC";
+string ADDMARKER = "SETMARKER";
+string GOTOMARKER = "GOTOMARKER";
 
 std::vector<std::string> toks;
 
 std::vector<std::string> varNames;
 std::vector<std::string> varValues;
+
+std::vector<string> markerNames;
+std::vector<int> markerLocations;
 
 bool inString = false;
 
@@ -222,8 +229,15 @@ void readFile(const char* filenombre)
 			}else if(word == PRINTLN){
 				toks.push_back("println");
 			}else if(word.at(0) == '\"'){
-				inString = true;
-				curString = word + ' ';
+				if(word.at(word.length()-1) == '\"'){
+					inString = false;
+					curString = curString + word;
+					toks.push_back("STRING " + curString);
+					curString = "";
+				} else {
+					inString = true;
+					curString = word + ' ';
+				}
 			}else if(word == ASSIGNMENT){
 				toks.push_back("assign");
 			}else if(word == REASSIGNMENT){
@@ -240,6 +254,8 @@ void readFile(const char* filenombre)
 				toks.push_back("mult");
 			}else if(word == DIVISION){
 				toks.push_back("div");
+			}else if (word == SQRT){
+				toks.push_back("sqrt");
 			}else if(word == IF){
 				toks.push_back("if");
 			}else if(word == THEN){
@@ -268,10 +284,20 @@ void readFile(const char* filenombre)
 				toks.push_back("dowhile");
 			}else if(word == WHILEEND){
 				toks.push_back("endwhile");
+			}else if (word == BREAKLOOP){
+				toks.push_back("breakloop");
 			}else if(word == STARTCOMMENT){
 				while(words[i] != ENDCOMMENT){
 					i ++;
 				}
+			}else if (word == ADDMARKER){
+				toks.push_back("createmarker");
+				toks.push_back(words[i + 1]);
+				i++;
+			}else if (word == GOTOMARKER){
+				toks.push_back("gotomarker");
+				toks.push_back(words[i + 1]);
+				i++;
 			}else{
 				toks.push_back("VAR " + word);
 			}
@@ -369,8 +395,17 @@ void parse()
 			}else if(toks[i] == "input"){
 				string x;
 				cin >> x;
-				varNames.push_back(toks[i+1]);
-				varValues.push_back("STRING \"" + x + "\"");
+				bool varExists = false;
+				for (int j = 0; j < varNames.size(); j++) {
+					if (varNames[j] == toks[i+1]) {
+						varValues[j] = "STRING \"" + x + "\"";
+						varExists = true;
+					}
+				}
+				if (!varExists) {
+					varNames.push_back(toks[i+1]);
+					varValues.push_back("STRING \"" + x + "\"");
+				}
 				i++;
 			}else if(toks[i] == "assign"){
 				varNames.push_back(toks[i+1]);
@@ -400,14 +435,22 @@ void parse()
 						varValues.push_back("INTEGER " +  NumberToString(answer));
 						i += 2;
 					}
+				}else if(toks[i+2] == "sqrt"){
+					if(toks[i+3].substr(0,3) == "VAR"){
+						varValues.push_back("INTEGER " + NumberToString(sqrt(varToInt(toks[i+3]))));
+					}else if (toks[i+3].substr(0, 8) == "INTEGER"){
+						varValues.push_back("INTEGER " + NumberToString(sqrt(stringToInt(toks[i+3].substr(8, toks[i+3].length())))));
+					}
+					i += 1;
 				}else{
 					varValues.push_back(toks[i+2]);
 				}
+				//testVars();
 				i += 2;
 			}else if(toks[i] == "ifend"){
 				doAction = true;
 			}else if(toks[i] == "if"){
-				if(toks[i+1] == "stringequal"){
+				if(toks[i+1] == "stringequal" || toks[i+1] == "notstringequal"){
 					if(toks[i+2].substr(0, 3) == "VAR" and toks[i+3].substr(0, 3) == "VAR"){
 						string firstValue = varToString(toks[i+2]);
 						string secondValue = varToString(toks[i+3]);
@@ -423,6 +466,7 @@ void parse()
 					}else if(toks[i+3].substr(0, 6) == "STRING" and toks[i+2].substr(0, 6) == "STRING"){
 						string firstValue = varToString(toks[i+2].substr(8, toks[i+2].length()-1));
 						string secondValue = varToString(toks[i+3].substr(8, toks[i+3].length()-1));
+						cout << toks[i+1] << ", " << firstValue << ", " << secondValue << endl;
 						doAction = checkStringConditional(toks[i+1], firstValue, secondValue);
 					}
 				}else{
@@ -477,6 +521,18 @@ void parse()
 					changeVariable(toks[i+1], newValue);\
 					i += 2;
 					//testVars();
+				}else if(toks[i+2] == "sqrt"){
+					if(toks[i+3].substr(0,3) == "VAR"){
+						changeVariable(toks[i+1], "INTEGER " + NumberToString(sqrt(varToInt(toks[i+3]))));
+					}else if (toks[i+3].substr(0, 7) == "INTEGER"){
+						for (int j = 0; j < varNames.size(); j++) {
+							if (varNames[j] == toks[i + 1]) {
+								varValues[j] = "INTEGER " + NumberToString(sqrt(stringToInt(toks[i+3].substr(8, toks[i+3].length()))));
+							}
+						}
+						//changeVariable(toks[i+1], "INTEGER " + NumberToString(sqrt(stringToInt(toks[i+3].substr(8, toks[i+3].length())))));
+					}
+					i += 1;
 				}else{
 					changeVariable(toks[i+1], toks[i+2]);
 				}
@@ -507,6 +563,20 @@ void parse()
 				//startOfWhile = i;
 			}else if(toks[i] == "endwhile"){
 				i = startOfWhile;
+			}else if (toks[i] == "breakloop"){
+				doWhileAction = false;
+			}else if (toks[i] == "createmarker"){
+				markerNames.push_back(toks[i+1]);
+				i++;
+				markerLocations.push_back(i);
+			}else if (toks[i] == "gotomarker") {
+				int location = 0;
+				for (int j = 0; j < markerNames.size(); j++) {
+					if (markerNames[j] == toks[i + 1]) {
+						location = j;
+					}
+				}
+				i = markerLocations[location];
 			}else{
 				cerr << "\n" << "Unkown Token: " + toks[i] << "\n";
 			}
