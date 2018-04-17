@@ -1,0 +1,79 @@
+READFILE "examples/file.txt" a
+LET current_index 1
+LET word ""
+LET file_length LEN a
+
+LET number_of_registers 1000
+NEWGROUP registers
+LET i 0
+WHILE LESS i number_of_registers DO
+	ADDTOGROUP registers 0
+	CHANGE i ADD i 1
+ENDWHILE
+
+LET number_of_loops_allowed 1000
+NEWGROUP looplocators
+CHANGE i 0
+WHILE LESS i number_of_loops_allowed DO
+	ADDTOGROUP looplocators 0
+	CHANGE i ADD i 1
+ENDWHILE
+LET number_of_loops_used 0
+
+LET temp_for_printing 0
+LET temp_for_adding_1 0
+LET temp_for_looping_1 0
+LET temp_for_looping_2 0
+
+LET current_register_location 1
+
+WHILE LEQU current_index file_length DO
+	CHANGE word CHARAT a current_index
+	IF SEQU word "+" THEN
+		CHANGE temp_for_adding_1 ACCESSGROUP registers current_register_location
+		CHANGE temp_for_adding_1 ADD temp_for_adding_1 1
+		SETGROUP registers current_register_location temp_for_adding_1
+	ENDIF
+	IF SEQU word "-" THEN
+		CHANGE temp_for_adding_1 ACCESSGROUP registers current_register_location
+		CHANGE temp_for_adding_1 SUB temp_for_adding_1 1
+		SETGROUP registers current_register_location temp_for_adding_1
+	ENDIF
+	IF SEQU word "." THEN
+		CHANGE temp_for_printing ACCESSGROUP registers current_register_location
+		CHANGE temp_for_printing TOASCII temp_for_printing
+		SAY temp_for_printing
+	ENDIF
+	IF SEQU word ">" THEN
+		CHANGE current_register_location ADD current_register_location 1
+		IF GEQU current_register_location number_of_registers THEN
+			CHANGE current_register_location number_of_registers
+		ENDIF
+	ENDIF
+	IF SEQU word "<" THEN
+		CHANGE current_register_location SUB current_register_location 1
+		IF LESS current_register_location 1 THEN
+			CHANGE current_register_location 1
+		ENDIF
+	ENDIF
+	IF SEQU word "[" THEN
+		CHANGE temp_for_looping_1 ACCESSGROUP registers current_register_location
+		IF NEQU temp_for_looping_1 0 THEN
+			CHANGE number_of_loops_used ADD number_of_loops_used 1
+			SC CHANGE temp_for_looping_2 SUB current_index 1 EC
+			SETGROUP looplocators number_of_loops_used current_index
+		ENDIF
+	ENDIF
+	IF SEQU word "]" THEN
+		CHANGE temp_for_looping_1 ACCESSGROUP registers current_register_location
+		CHANGE temp_for_looping_2 ACCESSGROUP looplocators number_of_loops_used
+		SETGROUP looplocators number_of_loops_used 0
+		CHANGE number_of_loops_used SUB number_of_loops_used 1
+		IF NEQU temp_for_looping_1 0 THEN
+			CHANGE temp_for_looping_2 SUB temp_for_looping_2 1
+			CHANGE current_index ADD temp_for_looping_2 0
+		ENDIF
+	ENDIF
+
+	CHANGE current_index ADD current_index 1
+ENDWHILE

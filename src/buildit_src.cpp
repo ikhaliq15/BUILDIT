@@ -23,9 +23,14 @@ string SUBTRACTION = "SUB";
 string MULTIPLICATION = "MULT";
 string DIVISION = "DIV";
 string SQRT = "SQRT";
+string MOD = "MOD";
 string CASTTOSTRING = "TOSTRING";
+string CHARAT = "CHARAT";
+string LENGTH = "LEN";
 string CASTTOINT = "TONUM";
+string CASTTOASCII = "TOASCII";
 string RANDOMINT = "RANDINT";
+string REVERSESTRING = "REVERSE";
 string IF = "IF";
 string THEN = "THEN";
 string END = "ENDIF";
@@ -45,6 +50,12 @@ string STARTCOMMENT = "SC";
 string ENDCOMMENT = "EC";
 string ADDMARKER = "SETMARKER";
 string GOTOMARKER = "GOTOMARKER";
+string READFILE = "READFILE";
+//Group Commands
+string CREATEGROUP = "NEWGROUP";
+string APPENDTOGROUP = "ADDTOGROUP";
+string ACCESSGROUP = "ACCESSGROUP";
+string SETGROUPAT = "SETGROUP";
 
 std::vector<std::string> toks;
 
@@ -54,18 +65,21 @@ std::vector<std::string> varValues;
 std::vector<string> markerNames;
 std::vector<int> markerLocations;
 
+std::vector<std::string> groupNames;
+std::vector<std::vector<int> > groupValues;
+
 bool inString = false;
 
 
 bool isDigits(const std::string &str)
 {
-	return str.find_first_not_of("0123456789") == std::string::npos;
+	return str.find_first_not_of("0123456789.") == std::string::npos;
 }
 
-int stringToInt(const string &str) {
+long stringToInt(const string &str) {
 	stringstream ss;
 	ss << str;
-	int value;
+	long value;
 	ss >> value;
 	//cout << "INPUT: " << str << ", OUTPUT: " << value << endl;
 	return value;
@@ -79,16 +93,16 @@ template <typename T>
 	 return ss.str();
   }
 
-int varToInt(string var){
-	int indexOfVar = 0;
-	for(int j = 0; j < varNames.size(); j++){
+long varToInt(string var){
+	long indexOfVar = 0;
+	for(long j = 0; j < varNames.size(); j++){
 		if(varNames[j] == var){
 			indexOfVar = j;
 			break;
 		}
 	}
 
-	int firstValue = 0;
+	long firstValue = 0;
 
 	if(varValues[indexOfVar].substr(0, 6) == "STRING"){
 		string x = varValues[indexOfVar].substr(8, varValues[indexOfVar].length());
@@ -102,8 +116,8 @@ int varToInt(string var){
 }
 
 string varToString(string var){
-	int indexOfVar = 0;
-	for(int j = 0; j < varNames.size(); j++){
+	long indexOfVar = 0;
+	for(long j = 0; j < varNames.size(); j++){
 		if(varNames[j] == var){
 			indexOfVar = j;
 			break;
@@ -123,6 +137,18 @@ string varToString(string var){
 	return firstValue;
 }
 
+string reverseStr(string str)
+{
+	//cout << "Reversing " << str << endl;
+    int n = str.length();
+ 
+    // Swap character starting from two
+    // corners
+    for (int i=0; i<n/2; i++)
+       swap(str[i], str[n-i-1]);
+   return str;
+}
+
 bool checkStringConditional(string op, string first, string second){
 	if(op == "stringequal"){
 		if(first == second){
@@ -139,7 +165,7 @@ bool checkStringConditional(string op, string first, string second){
 	}
 }
 
-bool checkConditional(string op, int first, int second){
+bool checkConditional(string op, long first, long second){
 	if(op == "intequal"){
 		if(first == second){
 			return true;
@@ -180,9 +206,9 @@ bool checkConditional(string op, int first, int second){
 	} 
 }
 
-int changeVariable(string name, string newValue){
-	int indexOfVar = 0;
-	for(int j = 0; j < varNames.size(); j++){
+long changeVariable(string name, string newValue){
+	long indexOfVar = 0;
+	for(long j = 0; j < varNames.size(); j++){
 		if(varNames[j] == name){
 			indexOfVar = j;
 			break;
@@ -191,12 +217,12 @@ int changeVariable(string name, string newValue){
 	varValues[indexOfVar] = newValue;
 }
 
-int randintinrange(int min, int max) {
+long randintinrange(long min, long max) {
     return (rand()%(max-min+1)) + min;
 }
 
-int doMath(string op, int first, int second){
-	int answer = 0;
+long doMath(string op, long first, long second){
+	long answer = 0;
 
 	if(op == "add"){
 		answer = (first + second);
@@ -208,6 +234,8 @@ int doMath(string op, int first, int second){
 		answer = (first / second); 
 	}else if(op == "randomint"){
 		answer = randintinrange(first, second);
+	}else if(op == "modulo") {
+		answer = first % second;
 	}
 
 	return answer;
@@ -230,9 +258,10 @@ void readFile(const char* filenombre)
 	   words.push_back(word);
 	}
 
-	int i = 0;
+	long i = 0;
 	while (i < words.size()){
 		word = words[i];
+		//cout << word << endl;
 		if(not inString){
 			if(word == PRINT){
 				toks.push_back("print");
@@ -252,6 +281,8 @@ void readFile(const char* filenombre)
 				toks.push_back("assign");
 			}else if(word == REASSIGNMENT){
 				toks.push_back("reassign");
+			}else if (word == CHARAT) {
+				toks.push_back("charatindex");
 			}else if(word == INPUT){
 				toks.push_back("input");
 			}else if(isDigits(word)){
@@ -266,8 +297,16 @@ void readFile(const char* filenombre)
 				toks.push_back("div");
 			}else if (word == SQRT){
 				toks.push_back("sqrt");
+			}else if (word == MOD) {
+				toks.push_back("modulo");
 			}else if (word == RANDOMINT) {
 				toks.push_back("randomint");
+			}else if (word == REVERSESTRING) {
+				toks.push_back("reversestring");
+			}else if (word == CASTTOASCII) {
+				toks.push_back("converttoascii");
+			}else if (word == LENGTH) {
+				toks.push_back("lengthof");
 			}else if(word == IF){
 				toks.push_back("if");
 			}else if(word == THEN){
@@ -314,6 +353,16 @@ void readFile(const char* filenombre)
 				toks.push_back("casttoint");
 			}else if (word == CASTTOSTRING) {
 				toks.push_back("casttostring");
+			}else if (word == READFILE) {
+				toks.push_back("readfile");
+			}else if (word == CREATEGROUP) {
+				toks.push_back("createemptygroup");
+			}else if (word == APPENDTOGROUP) {
+				toks.push_back("appendtogroup");
+			}else if (word == ACCESSGROUP) {
+				toks.push_back("accessgroup");
+			}else if (word == SETGROUPAT) {
+				toks.push_back("setgroupat");
 			}else{
 				toks.push_back("VAR " + word);
 			}
@@ -352,10 +401,10 @@ bool checkIfDataIs(string x, string type) {
 }
 
 
-std::vector<std::string> getConditionalValue(std::vector<std::string> tokens, int position){
+std::vector<std::string> getConditionalValue(std::vector<std::string> tokens, long position){
 	std::vector<std::string> output;
 
-	int moveOver = 0;
+	long moveOver = 0;
 	if(tokens[position+1] == "stringequal" || tokens[position+1] == "notstringequal"){
 		if(checkIfDataIs(tokens[position+2], "VAR") and checkIfDataIs(tokens[position+3], "VAR")){
 			string firstValue = varToString(tokens[position+2]);
@@ -376,20 +425,20 @@ std::vector<std::string> getConditionalValue(std::vector<std::string> tokens, in
 		}
 	}else{
 		if(checkIfDataIs(tokens[position+2], "VAR") and checkIfDataIs(tokens[position+3], "VAR")){
-			int firstValue = varToInt(tokens[position+2]);
-			int secondValue = varToInt(tokens[position+3]);
+			long firstValue = varToInt(tokens[position+2]);
+			long secondValue = varToInt(tokens[position+3]);
 			output.push_back(BoolToString(checkConditional(tokens[position+1], firstValue, secondValue)));
 		}else if(checkIfDataIs(tokens[position+2], "VAR") and checkIfDataIs(tokens[position+3], "INTEGER")){
-			int firstValue = varToInt(tokens[position+2]);					
-			int secondValue = stringToInt(tokens[position+3].substr(8, tokens[position+3].length()));
+			long firstValue = varToInt(tokens[position+2]);					
+			long secondValue = stringToInt(tokens[position+3].substr(8, tokens[position+3].length()));
 			output.push_back(BoolToString(checkConditional(tokens[position+1], firstValue, secondValue)));
 		}else if(checkIfDataIs(tokens[position+3], "VAR") and checkIfDataIs(tokens[position+2], "INTEGER")){
-			int secondValue = varToInt(tokens[position+3]);
-			int firstValue = stringToInt(tokens[position+2].substr(8, tokens[position+2].length()));
+			long secondValue = varToInt(tokens[position+3]);
+			long firstValue = stringToInt(tokens[position+2].substr(8, tokens[position+2].length()));
 			output.push_back(BoolToString(checkConditional(tokens[position+1], firstValue, secondValue)));
 		}else if(checkIfDataIs(tokens[position+3], "INTEGER") and checkIfDataIs(tokens[position+3], "INTEGER")){
-			int firstValue = stringToInt(tokens[position+2].substr(8, tokens[position+2].length()));
-			int secondValue = stringToInt(tokens[position+3].substr(8, tokens[position+3].length()));
+			long firstValue = stringToInt(tokens[position+2].substr(8, tokens[position+2].length()));
+			long secondValue = stringToInt(tokens[position+3].substr(8, tokens[position+3].length()));
 			output.push_back(BoolToString(checkConditional(tokens[position+1], firstValue, secondValue)));
 		}
 	}
@@ -399,14 +448,14 @@ std::vector<std::string> getConditionalValue(std::vector<std::string> tokens, in
 } 
 
 bool isMathOperator(string x) {
-	return x == "add" || x == "sub" || x == "mult" || x == "div" || x == "randomint";
+	return x == "add" || x == "sub" || x == "mult" || x == "div" || x == "randomint" || x == "modulo";
 }
 
 void testLexer(){
 	//Testing the lexer
 	cout << "Num Toks: " << toks.size() << endl;
 	
-	for(int i = 0; i <= toks.size()-1;i++){
+	for(long i = 0; i <= toks.size()-1;i++){
 		cout << toks[i] << endl;
 	}
 
@@ -415,7 +464,7 @@ void testLexer(){
 
 void testVars(){
 	cout << "Num Vars: " << varNames.size() << endl;
-	for (int i = 0; i <= varNames.size()-1;i++){
+	for (long i = 0; i <= varNames.size()-1;i++){
 		cout << "Name: " << varNames[i] << " " << "Value: " << varValues[i] << endl;
 	}
 }
@@ -424,10 +473,10 @@ void testVars(){
 //This takes the translated file and performs actions.
 void parse()
 {
-	int i = 0;
+	long i = 0;
 	bool doAction = true;
 	bool doWhileAction = true;
-	int startOfWhile = -21;
+	long startOfWhile = -21;
 
 	while (i < toks.size()) {
 		if (toks[i] == "createmarker"){
@@ -447,8 +496,8 @@ void parse()
 					string returnValue = toks[i + 1].substr(8);
 					cout << returnValue.substr(0, returnValue.length()-1);
 				}else if(toks[i + 1].substr(0, 3) == "VAR"){
-					int indexOfVar = 0;
-					for(int j = 0; j < varNames.size(); j++){
+					long indexOfVar = 0;
+					for(long j = 0; j < varNames.size(); j++){
 						if(varNames[j] == toks[i+1]){
 							indexOfVar = j;
 							break;
@@ -470,8 +519,8 @@ void parse()
 					string returnValue = toks[i + 1].substr(8);
 					cout << returnValue.substr(0, returnValue.length()-1) << endl;
 				}else if(toks[i + 1].substr(0, 3) == "VAR"){
-					int indexOfVar = 0;
-					for(int j = 0; j < varNames.size(); j++){
+					long indexOfVar = 0;
+					for(long j = 0; j < varNames.size(); j++){
 						if(varNames[j] == toks[i+1]){
 							indexOfVar = j;
 							break;
@@ -492,7 +541,7 @@ void parse()
 				string x;
 				cin >> x;
 				bool varExists = false;
-				for (int j = 0; j < varNames.size(); j++) {
+				for (long j = 0; j < varNames.size(); j++) {
 					if (varNames[j] == toks[i+1]) {
 						varValues[j] = "STRING \"" + x + "\"";
 						varExists = true;
@@ -507,27 +556,27 @@ void parse()
 				varNames.push_back(toks[i+1]);
 				if(isMathOperator(toks[i+2])) {
 					if(toks[i+3].substr(0, 3) == "VAR" and toks[i+4].substr(0, 3) == "VAR"){
-						int firstValue = varToInt(toks[i+3]);
-						int secondValue = varToInt(toks[i+4]);
-						int answer = doMath(toks[i+2], firstValue, secondValue);
+						long firstValue = varToInt(toks[i+3]);
+						long secondValue = varToInt(toks[i+4]);
+						long answer = doMath(toks[i+2], firstValue, secondValue);
 						varValues.push_back("INTEGER " +  NumberToString(answer));
 						i += 2;
 					}else if(toks[i+3].substr(0, 3) == "VAR" and toks[i+4].substr(0, 7) == "INTEGER"){
-						int firstValue = varToInt(toks[i+3]);
-						int secondValue = stringToInt(toks[i+4].substr(8, toks[i+4].length()));
-						int answer = doMath(toks[i+2], firstValue, secondValue);
+						long firstValue = varToInt(toks[i+3]);
+						long secondValue = stringToInt(toks[i+4].substr(8, toks[i+4].length()));
+						long answer = doMath(toks[i+2], firstValue, secondValue);
 						varValues.push_back("INTEGER " +  NumberToString(answer));
 						i += 2;
 					}else if(toks[i+4].substr(0, 3) == "VAR" and toks[i+3].substr(0, 7) == "INTEGER"){
-						int secondValue = varToInt(toks[i+4]);
-						int firstValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
-						int answer = doMath(toks[i+2], firstValue, secondValue);
+						long secondValue = varToInt(toks[i+4]);
+						long firstValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
+						long answer = doMath(toks[i+2], firstValue, secondValue);
 						varValues.push_back("INTEGER " +  NumberToString(answer));
 						i += 2;
 					}else if(toks[i+4].substr(0, 7) == "INTEGER" and toks[i+3].substr(0, 7) == "INTEGER"){
-						int firstValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
-						int secondValue = stringToInt(toks[i+4].substr(8, toks[i+4].length()));
-						int answer = doMath(toks[i+2], firstValue, secondValue);
+						long firstValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
+						long secondValue = stringToInt(toks[i+4].substr(8, toks[i+4].length()));
+						long answer = doMath(toks[i+2], firstValue, secondValue);
 						varValues.push_back("INTEGER " +  NumberToString(answer));
 						i += 2;
 					}
@@ -557,6 +606,82 @@ void parse()
 						varValues.push_back("INTEGER " + toks[i+3].substr(8, toks[i+3].length()));
 					}
 					i += 1;
+				}else if (toks[i+2] == "reversestring") {	
+					if(toks[i+3].substr(0,3) == "VAR"){
+						varValues.push_back("STRING " + reverseStr( varToString(toks[i + 3]) ) + "\"");
+					}else if (toks[i+3].substr(0, 6) == "STRING") {
+						//cout << "SENDING " << toks[i+3].substr(8, toks[i+3].length() - 2 ) << endl;
+						varValues.push_back("STRING " + reverseStr( toks[i+3].substr(8, toks[i+3].length() - 2 ) ) + "\"");
+					}
+					i += 1;
+				}else if (toks[i+2] == "charatindex") {
+					string newValue = "";	
+					if(toks[i+3].substr(0,3) == "VAR"){
+						if (toks[i+4].substr(0, 3) == "VAR") {
+							newValue = ("STRING \"" + ( varToString(toks[i+3]).substr(varToInt(toks[i+4]) - 1,1)) + "\"");
+							//cout << "INDEX: " << varToInt(toks[i+4]) << " WORD: " << varToString(toks[i+3]) << " NEW VALUE: " << newValue << endl;
+						} else {
+							newValue = ("STRING " + ( varToString(toks[i + 3]).substr(stringToInt(toks[i+4]), stringToInt(toks[i+4]) + 1) ) + "\"" );
+							//cout << "INDEX: " << (toks[i+4]) << endl;
+						}
+					}else if (toks[i+3].substr(0, 6) == "STRING") {
+						if (toks[i+4].substr(0,3) == "VAR") {
+							newValue = ("STRING \"" + ( toks[i+3].substr(8 + varToInt(toks[i+4]) - 1 , 1)) + "\"");
+							//cout << "INDEX: " << varToInt(toks[i+4]) << " WORD: " << toks[i+3] << " NEW VALUE: " << newValue << endl;
+						} else {
+							newValue = ("STRING " + ( toks[i+3].substr(8 + stringToInt(toks[i+4]) + 1, stringToInt(toks[i+4]) + 2)) + "\"");
+							//cout << "INDEX: " << (toks[i+4]) << endl;
+						}
+					}
+					varValues.push_back(newValue);
+					i += 2;
+				}else if (toks[i+2] == "lengthof") {
+					string newValue = "";	
+					if(toks[i+3].substr(0,3) == "VAR"){
+						if (toks[i+4].substr(0, 3) == "VAR") {
+							newValue = ("INTEGER " + NumberToString(varToString(toks[i+3]).length() - 1));
+							//cout << "INDEX: " << varToInt(toks[i+4]) << " WORD: " << varToString(toks[i+3]) << " NEW VALUE: " << newValue << endl;
+						} else {
+							newValue = ("INTEGER " + NumberToString(varToString(toks[i + 3]).length() - 1));
+							//cout << "INDEX: " << (toks[i+4]) << endl;
+						}
+					}else if (toks[i+3].substr(0, 6) == "STRING") {
+						if (toks[i+4].substr(0,3) == "VAR") {
+							newValue = ("INTEGER " + NumberToString(toks[i+3].length()-1) );
+							//cout << "INDEX: " << varToInt(toks[i+4]) << " WORD: " << toks[i+3] << " NEW VALUE: " << newValue << endl;
+						} else {
+							newValue = ("INTEGER " + NumberToString(toks[i+3].length()-9));
+							//cout << "INDEX: " << (toks[i+4]) << endl;
+						}
+					}
+					varValues.push_back(newValue);
+					i += 1;
+				}else if (toks[i+2] == "accessgroup") {
+					string newValue = "";
+					if (toks[i+4].substr(0, 3) == "VAR") {
+						int access_index = varToInt(toks[i+4]) - 1;
+						string groupsName = toks[i+3];
+						int num = -1;
+						for (int k = 0; k < groupNames.size(); k++) {
+							if (groupNames[k] == groupsName) {
+								num = groupValues[k][access_index];
+							}
+						}
+						newValue = "INTEGER " + NumberToString(num);
+					} else {
+						//ASSUME AN INTEGER.
+						int access_index = stringToInt(toks[i+4].substr(8)) - 1;
+						string groupsName = toks[i+3];
+						int num = -1;
+						for (int k = 0; k < groupNames.size(); k++) {
+							if (groupNames[k] == groupsName) {
+								num = groupValues[k][access_index];
+							}
+						}
+						newValue = "INTEGER " + NumberToString(num);
+					}
+					varValues.push_back(newValue);
+					i += 2;
 				}else{
 					varValues.push_back(toks[i+2]);
 				}
@@ -572,27 +697,27 @@ void parse()
 				if(isMathOperator(toks[i+2])){
 					string newValue = toks[i+2];
 					if(toks[i+3].substr(0, 3) == "VAR" and toks[i+4].substr(0, 3) == "VAR"){
-						int firstValue = varToInt(toks[i+3]);
-						int secondValue = varToInt(toks[i+4]);
-						int answer = doMath(toks[i+2], firstValue, secondValue);
+						long firstValue = varToInt(toks[i+3]);
+						long secondValue = varToInt(toks[i+4]);
+						long answer = doMath(toks[i+2], firstValue, secondValue);
 						newValue = ("INTEGER " +  NumberToString(answer));
 						//i += 2;
 					}else if(toks[i+3].substr(0, 3) == "VAR" and toks[i+4].substr(0, 7) == "INTEGER"){
-						int firstValue = varToInt(toks[i+3]);
-						int secondValue = stringToInt(toks[i+4].substr(8, toks[i+4].length()));
-						int answer = doMath(toks[i+2], firstValue, secondValue);
+						long firstValue = varToInt(toks[i+3]);
+						long secondValue = stringToInt(toks[i+4].substr(8, toks[i+4].length()));
+						long answer = doMath(toks[i+2], firstValue, secondValue);
 						newValue = ("INTEGER " +  NumberToString(answer));
 						//i += 2;
 					}else if(toks[i+4].substr(0, 3) == "VAR" and toks[i+3].substr(0, 7) == "INTEGER"){
-						int secondValue = varToInt(toks[i+4]);
-						int firstValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
-						int answer = doMath(toks[i+2], firstValue, secondValue);
+						long secondValue = varToInt(toks[i+4]);
+						long firstValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
+						long answer = doMath(toks[i+2], firstValue, secondValue);
 						newValue = ("INTEGER " +  NumberToString(answer));
 						//i += 2;
 					}else if(toks[i+4].substr(0, 7) == "INTEGER" and toks[i+3].substr(0, 7) == "INTEGER"){
-						int firstValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
-						int secondValue = stringToInt(toks[i+4].substr(8, toks[i+4].length()));
-						int answer = doMath(toks[i+2], firstValue, secondValue);
+						long firstValue = stringToInt(toks[i+3].substr(8, toks[i+3].length()));
+						long secondValue = stringToInt(toks[i+4].substr(8, toks[i+4].length()));
+						long answer = doMath(toks[i+2], firstValue, secondValue);
 						newValue = ("INTEGER " +  NumberToString(answer));
 						//i += 2;
 					}
@@ -604,7 +729,7 @@ void parse()
 					if(toks[i+3].substr(0,3) == "VAR"){
 						changeVariable(toks[i+1], "INTEGER " + NumberToString(sqrt(varToInt(toks[i+3]))));
 					}else if (toks[i+3].substr(0, 7) == "INTEGER"){
-						for (int j = 0; j < varNames.size(); j++) {
+						for (long j = 0; j < varNames.size(); j++) {
 							if (varNames[j] == toks[i + 1]) {
 								varValues[j] = "INTEGER " + NumberToString(sqrt(stringToInt(toks[i+3].substr(8, toks[i+3].length()))));
 							}
@@ -620,7 +745,7 @@ void parse()
 					}else if (toks[i+3].substr(0, 6) == "STRING") {
 						newValue = ("INTEGER " + toks[i+3].substr(8, toks[i+3].length()));
 					}
-					for (int j = 0; j < varNames.size(); j++) {
+					for (long j = 0; j < varNames.size(); j++) {
 						if (varNames[j] == toks[i + 1]) {
 							varValues[j] = newValue;
 						}
@@ -635,12 +760,100 @@ void parse()
 					}else if (toks[i+3].substr(0, 6) == "STRING") {
 						newValue = (toks[i+3]);
 					}
-					for (int j = 0; j < varNames.size(); j++) {
+					for (long j = 0; j < varNames.size(); j++) {
 						if (varNames[j] == toks[i + 1]) {
 							varValues[j] = newValue;
 						}
 					}
 					i += 1;
+				}else if (toks[i+2] == "reversestring") {
+					string newValue = "";	
+					if(toks[i+3].substr(0,3) == "VAR"){
+						newValue = ("STRING " + reverseStr( varToString(toks[i + 3]) ) + "\"" );
+					}else if (toks[i+3].substr(0, 6) == "STRING") {
+						newValue = ("STRING " + reverseStr( toks[i+3].substr(8, toks[i+3].length() ) ) + "\"");
+					}
+					for (long j = 0; j < varNames.size(); j++) {
+						if (varNames[j] == toks[i + 1]) {
+							varValues[j] = newValue;
+						}
+					}
+					i += 1;
+				}else if (toks[i+2] == "converttoascii") {
+					string newValue = "";
+					if (toks[i+3].substr(0, 3) == "VAR") {
+						int asciinumber = varToInt(toks[i+3]);
+						char W = static_cast<char>(asciinumber);
+						std::string asciistring(1, W);
+						newValue = "STRING \"" + asciistring + "\"";
+					} else {
+						//ASSUME INTEGER
+						int asciinumber = stringToInt(toks[i+3].substr(8));
+						char W = static_cast<char>(asciinumber);
+						std::string asciistring(1, W);
+						newValue = "STRING \"" + asciistring + "\"";
+					}
+					for (long j = 0; j < varNames.size(); j++) {
+						if (varNames[j] == toks[i + 1]) {
+							varValues[j] = newValue;
+						}
+					}
+					i += 1;
+				}else if (toks[i+2] == "charatindex") {
+					string newValue = "";	
+					if(toks[i+3].substr(0,3) == "VAR"){
+						if (toks[i+4].substr(0, 3) == "VAR") {
+							newValue = ("STRING \"" + ( varToString(toks[i+3]).substr(varToInt(toks[i+4]) - 1,1)) + "\"");
+							//cout << "INDEX: " << varToInt(toks[i+4]) << " WORD: " << varToString(toks[i+3]) << " NEW VALUE: " << newValue << endl;
+						} else {
+							newValue = ("STRING " + ( varToString(toks[i + 3]).substr(stringToInt(toks[i+4]), stringToInt(toks[i+4]) + 1) ) + "\"" );
+							//cout << "INDEX: " << (toks[i+4]) << endl;
+						}
+					}else if (toks[i+3].substr(0, 6) == "STRING") {
+						if (toks[i+4].substr(0,3) == "VAR") {
+							newValue = ("STRING \"" + ( toks[i+3].substr(8 + varToInt(toks[i+4]) - 1 , 1)) + "\"");
+							//cout << "INDEX: " << varToInt(toks[i+4]) << " WORD: " << toks[i+3] << " NEW VALUE: " << newValue << endl;
+						} else {
+							newValue = ("STRING " + ( toks[i+3].substr(8 + stringToInt(toks[i+4]) + 1, stringToInt(toks[i+4]) + 2)) + "\"");
+							//cout << "INDEX: " << (toks[i+4]) << endl;
+						}
+					}
+					for (long j = 0; j < varNames.size(); j++) {
+						if (varNames[j] == toks[i + 1]) {
+							varValues[j] = newValue;
+						}
+					}
+					i += 2;
+				}else if (toks[i+2] == "accessgroup") {
+					string newValue = "";
+					if (toks[i+4].substr(0, 3) == "VAR") {
+						int access_index = varToInt(toks[i+4]) - 1;
+						string groupsName = toks[i+3];
+						int num = -1;
+						for (int k = 0; k < groupNames.size(); k++) {
+							if (groupNames[k] == groupsName) {
+								num = groupValues[k][access_index];
+							}
+						}
+						newValue = "INTEGER " + NumberToString(num);
+					} else {
+						//ASSUME AN INTEGER.
+						int access_index = stringToInt(toks[i+4].substr(8)) - 1;
+						string groupsName = toks[i+3];
+						int num = -1;
+						for (int k = 0; k < groupNames.size(); k++) {
+							if (groupNames[k] == groupsName) {
+								num = groupValues[k][access_index];
+							}
+						}
+						newValue = "INTEGER " + NumberToString(num);
+					}
+					for (long j = 0; j < varNames.size(); j++) {
+						if (varNames[j] == toks[i + 1]) {
+							varValues[j] = newValue;
+						}
+					}
+					i += 2;
 				}else{
 					changeVariable(toks[i+1], toks[i+2]);
 				}
@@ -658,14 +871,63 @@ void parse()
 				doWhileAction = false;
 			}else if (toks[i] == "createmarker"){
 				i++;
+			}else if (toks[i] == "readfile") {
+				string x;
+				std::ifstream t(toks[i+1].substr(8, toks[i+1].length() -9) );
+				std::stringstream buffer;
+				buffer << t.rdbuf();
+				x = buffer.str();
+				bool varExists = false;
+				for (long j = 0; j < varNames.size(); j++) {
+					if (varNames[j] == toks[i+2]) {
+						varValues[j] = "STRING \"" + x + "\"";
+						varExists = true;
+					}
+				}
+				if (!varExists) {
+					varNames.push_back(toks[i+2]);
+					varValues.push_back("STRING \"" + x + "\"");
+				}
+				i += 2;
 			}else if (toks[i] == "gotomarker") {
-				int location = 0;
-				for (int j = 0; j < markerNames.size(); j++) {
+				long location = 0;
+				for (long j = 0; j < markerNames.size(); j++) {
 					if (markerNames[j] == toks[i + 1]) {
 						location = j;
 					}
 				}
 				i = markerLocations[location];
+			}else if (toks[i] == "createemptygroup") {
+				groupNames.push_back(toks[i+1]);
+				std::vector<int> temp;
+				groupValues.push_back(temp);
+				i++;
+			}else if (toks[i] == "appendtogroup") {
+				for (int k = 0; k < groupNames.size(); k++) {
+					if (groupNames[k] == toks[i+1]) {
+						groupValues[k].push_back(stringToInt(toks[i+2].substr(8)));
+					}
+				}
+				i += 2;
+			}else if (toks[i] == "setgroupat"){
+				for (int k = 0; k < groupNames.size(); k++) {
+					int location;
+					if (toks[i+2].substr(0,3) == "VAR") {
+						location = varToInt(toks[i+2]);
+					} else {
+						//ASSUME INTEGER
+						location = stringToInt(toks[i+2].substr(8));
+					}
+					if (groupNames[k] == toks[i+1]) {
+						if (toks[i+3].substr(0, 3) == "VAR") {
+							groupValues[k].at(location - 1) = varToInt(toks[i+3]);
+						} else {
+							//ASSUME INTEGER
+							groupValues[k].at(location - 1) = stringToInt(toks[i+3].substr(8));
+						}
+					}
+				}
+				i += 3;
 			}else{
 				cerr << endl << "Unkown Token: " + toks[i] << endl;
 			}
@@ -694,7 +956,7 @@ int main ( int argc, char *argv[] )
 
   readFile(argv[1]);
 
-  for (int i = 0; i < argc; i++){
+  for (long i = 0; i < argc; i++){
   	std::string t = argv[i];
   	if (t == "-d") {
   		testLexer();

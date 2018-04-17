@@ -1,0 +1,32 @@
+LET isValid 0
+LET counter 1
+
+LET tOne 0
+LET tTwo 0
+
+LET total_sum 0
+
+WHILE LESS counter 1000 DO
+	CHANGE isValid 0
+
+	CHANGE tOne ADD counter 0
+	CHANGE tTwo DIV counter 3
+	CHANGE tTwo MULT tTwo 3
+	CHANGE tTwo SUB tOne tTwo
+	IF EQU tTwo 0 THEN
+		CHANGE isValid 1
+	ENDIF
+	CHANGE tOne ADD counter 0
+	CHANGE tTwo DIV counter 5
+	CHANGE tTwo MULT tTwo 5
+	CHANGE tTwo SUB tOne tTwo
+	IF EQU tTwo 0 THEN
+		CHANGE isValid 1
+	ENDIF
+	IF EQU isValid 1 THEN
+		CHANGE total_sum ADD total_sum counter
+	ENDIF
+	CHANGE counter ADD counter 1
+ENDWHILE
+
+SAYLN total_sum

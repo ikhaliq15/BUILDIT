@@ -1,0 +1,19 @@
+LET sum_of_squares 0
+LET sum_of_nums 0
+LET i 0
+
+LET temp 0
+
+WHILE LEQU i 100 DO
+	CHANGE temp MULT i i
+	CHANGE sum_of_squares ADD sum_of_squares temp
+	CHANGE sum_of_nums ADD sum_of_nums i
+	CHANGE i ADD i 1
+ENDWHILE
+
+CHANGE sum_of_nums MULT sum_of_nums sum_of_nums
+
+LET output SUB sum_of_nums sum_of_squares
+
+SAY "Difference: "
+SAYLN output

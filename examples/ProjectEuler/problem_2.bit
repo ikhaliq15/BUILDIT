@@ -1,0 +1,26 @@
+LET old_term 1
+LET temp 0
+LET new_term 1
+
+LET tOne 0
+LET tTwo 0
+
+LET total_sum 0
+
+WHILE LESS new_term 4000000 DO
+	
+	CHANGE tOne ADD new_term 0
+	CHANGE tTwo DIV new_term 2
+	CHANGE tTwo MULT tTwo 2
+	CHANGE tTwo SUB tOne tTwo
+	IF EQU tTwo 0 THEN
+		CHANGE total_sum ADD total_sum new_term
+	ENDIF
+
+	CHANGE temp ADD old_term 0
+	CHANGE old_term ADD new_term 0
+	CHANGE new_term ADD temp old_term
+ENDWHILE
+
+SAY "Total Sum: "
+SAYLN total_sum

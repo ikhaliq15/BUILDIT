@@ -1,0 +1,46 @@
+GOTOMARKER start
+
+SETMARKER checkIfMax
+
+IF GRE product max THEN
+	CHANGE max ADD product 0
+ENDIF
+
+GOTOMARKER back1
+
+SETMARKER start
+
+LET a 999
+LET b 999
+LET product MULT a b
+LET rev " "
+LET max 0
+
+SETMARKER first
+CHANGE a SUB a 1
+CHANGE b ADD 999 0
+
+SETMARKER second
+CHANGE b SUB b 1
+
+CHANGE product MULT a b
+CHANGE product TOSTRING product
+CHANGE rev REVERSE product
+
+IF EQU rev product THEN
+	CHANGE product TONUM product
+	GOTOMARKER checkIfMax
+ENDIF
+
+SETMARKER back1
+
+IF GRE b 99 THEN
+	GOTOMARKER second
+ENDIF
+
+IF GRE a 99 THEN
+	GOTOMARKER first
+ENDIF
+
+SAY "Largest Palindrome: "
+SAYLN max

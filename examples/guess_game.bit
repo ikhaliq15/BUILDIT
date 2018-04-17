@@ -31,6 +31,9 @@ SAYLN "Correct! Nice Job."
 GOTOMARKER end
 
 SETMARKER lose
-SAYLN "You lose!"
+SAY "You lose! "
+SAY "The number was "
+SAY num
+SAYLN "."
 
 SETMARKER end

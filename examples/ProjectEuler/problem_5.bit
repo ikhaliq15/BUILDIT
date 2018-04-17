@@ -1,0 +1,20 @@
+LET current_num 2
+LET counter 1
+
+LET temp MOD current_num counter
+
+WHILE LESS counter 20 DO
+
+	CHANGE counter ADD counter 1
+	CHANGE temp MOD current_num counter
+
+	IF NEQU temp 0 THEN
+		CHANGE counter ADD 0 0
+		CHANGE current_num ADD current_num 1
+		SAYLN current_num
+	ENDIF
+
+ENDWHILE
+
+SAY "First number divisible by numbers between 1 and 20: "
+SAYLN current_num

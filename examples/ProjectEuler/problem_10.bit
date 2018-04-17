@@ -1,0 +1,38 @@
+LET num 2
+LET sum 0
+
+LET temp 0
+LET isPrime 1
+LET sqrtN SQRT num
+LET counter 2
+
+SETMARKER a
+	
+	CHANGE sqrtN SQRT num
+	CHANGE isPrime ADD 1 0
+	CHANGE counter ADD 2 0
+
+	WHILE LEQU counter sqrtN DO
+		CHANGE temp MOD num counter
+		IF EQU temp 0 THEN
+			CHANGE isPrime 0
+			LEAVE
+		ENDIF
+		CHANGE counter ADD counter 1
+	ENDWHILE
+
+	IF EQU isPrime 1 THEN
+		CHANGE sum ADD sum num
+	ENDIF
+
+	CHANGE num ADD num 1
+	
+	SAY "Num: "
+	SAYLN num
+
+IF LEQU num 2000000 THEN
+	GOTOMARKER a
+ENDIF
+
+SAY "Sum of primes below 2,000,000: "
+SAYLN sum

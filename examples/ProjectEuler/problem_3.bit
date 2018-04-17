@@ -1,0 +1,60 @@
+LET number 600851475143
+LET s SQRT number
+LET temp MOD number 2
+LET max 0
+
+WHILE EQU temp 0 DO
+	CHANGE number DIV number 2
+	CHANGE temp MOD number 2
+	IF GRE 2 max THEN
+		CHANGE max ADD 0 2
+	ENDIF
+ENDWHILE
+
+LET counter 3
+
+SETMARKER a
+
+CHANGE temp MOD number counter
+
+WHILE EQU temp 0 DO
+	IF GRE counter max THEN
+		CHANGE max ADD 0 counter
+	ENDIF
+	CHANGE number DIV number counter
+	CHANGE temp MOD number counter
+ENDWHILE
+
+IF LESS counter s THEN
+	CHANGE counter ADD counter 2
+	GOTOMARKER a
+ENDIF
+
+LET tOne 0
+LET tTwo 0
+LET isPrime 1
+LET sqrtN SQRT number
+LET counter 2
+
+WHILE LEQU counter sqrtN DO
+	CHANGE tOne ADD num 0
+	CHANGE tTwo DIV num counter
+	CHANGE tTwo MULT tTwo counter
+	CHANGE tTwo SUB tOne tTwo
+	IF EQU tTwo 0 THEN
+		CHANGE isPrime 0
+		LEAVE
+	ENDIF
+	CHANGE counter ADD counter 1
+ENDWHILE
+
+IF EQU number 1 THEN
+	CHANGE isPrime ADD 0 0
+ENDIF
+
+IF EQU isPrime 1 THEN
+	CHANGE max ADD number 0
+ENDIF
+
+SAY "Highest Prime Factor: "
+SAYLN max
