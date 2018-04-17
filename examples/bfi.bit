@@ -1,9 +1,9 @@
-READFILE "examples/file.txt" a
+READFILE "examples/bfi_example.bfi" a
 LET current_index 1
 LET word ""
 LET file_length LEN a
 
-LET number_of_registers 1000
+LET number_of_registers 30000
 NEWGROUP registers
 LET i 0
 WHILE LESS i number_of_registers DO
@@ -11,7 +11,7 @@ WHILE LESS i number_of_registers DO
 	CHANGE i ADD i 1
 ENDWHILE
 
-LET number_of_loops_allowed 1000
+LET number_of_loops_allowed 10000
 NEWGROUP looplocators
 CHANGE i 0
 WHILE LESS i number_of_loops_allowed DO
