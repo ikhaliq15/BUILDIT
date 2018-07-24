@@ -1,0 +1,12 @@
+DEFINE factorial WITH number AS
+	LET i 1
+	LET sum 0
+	WHILE LEQU i number DO
+		CHANGE sum ADD sum i
+	ENDWHILE
+
+	RETURN sum
+ENDDEF
+
+LET result CALL factorial WITH 10
+SAYLN result

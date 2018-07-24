@@ -56,6 +56,11 @@ string CREATEGROUP = "NEWGROUP";
 string APPENDTOGROUP = "ADDTOGROUP";
 string ACCESSGROUP = "ACCESSGROUP";
 string SETGROUPAT = "SETGROUP";
+//Function Commands
+string DEFINEFUNCTION = "DEFINE";
+string STARTPARAMETERS = "WITH";
+string STARTFUNCTION = "AS";
+string ENDFUNCTION = "ENDDEF";
 
 std::vector<std::string> toks;
 
@@ -163,6 +168,9 @@ bool checkStringConditional(string op, string first, string second){
 			return false;
 		}
 	}
+	cout << "ERROR: YOU APPEAR TO BE MISSING A VALID STRING CONDITIONAL OPERATOR." << endl;
+	exit(0);
+	return false;
 }
 
 bool checkConditional(string op, long first, long second){
@@ -204,9 +212,12 @@ bool checkConditional(string op, long first, long second){
 			return false;
 		}
 	} 
+	cout << "ERROR: YOU APPEAR TO BE MISSING A VALID CONDITIONAL OPERATOR." << endl;
+	exit(0);
+	return false;
 }
 
-long changeVariable(string name, string newValue){
+void changeVariable(string name, string newValue){
 	long indexOfVar = 0;
 	for(long j = 0; j < varNames.size(); j++){
 		if(varNames[j] == name){
@@ -363,6 +374,14 @@ void readFile(const char* filenombre)
 				toks.push_back("accessgroup");
 			}else if (word == SETGROUPAT) {
 				toks.push_back("setgroupat");
+			}else if (word == DEFINEFUNCTION) {
+				toks.push_back("startfunctiondefinition");
+			}else if (word == STARTPARAMETERS) {
+				toks.push_back("startdefiningparameters");
+			}else if (word == STARTFUNCTION) {
+				toks.push_back("startfunctioncode");
+			}else if (word == ENDFUNCTION) {
+				toks.push_back("endfunctioncode");
 			}else{
 				toks.push_back("VAR " + word);
 			}
@@ -928,6 +947,8 @@ void parse()
 					}
 				}
 				i += 3;
+			}else if(toks[i] == "startfunctiondefinition") {
+				
 			}else{
 				cerr << endl << "Unkown Token: " + toks[i] << endl;
 			}
