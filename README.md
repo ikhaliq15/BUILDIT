@@ -5,6 +5,11 @@ BuildIT is a small programming language written in C++ that was built as a proof
 
 ## Change Log
 
+#### v2.0.0
+- Complete recoding of project, called ReBuildIT.
+- Expressions can be totally nested
+- Consistency greatly increased.
+
 #### v1.2.0
 - Fixed examples
 - Added Markers
