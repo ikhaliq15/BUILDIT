@@ -1,0 +1,51 @@
+READFILE "examples/bfi_example.bfi" bfp
+LET file_length LEN bfp
+
+LET number_of_registers 2000
+NEWGROUP registers
+LET i 0
+WHILE LESS i number_of_registers DO
+	ADDTOGROUP registers 0
+	CHANGE i ADD i 1
+ENDWHILE
+
+LET pointer_location 1
+
+LET current_command_index 1
+LET current_command ""
+
+WHILE LEQU current_command_index file_length DO
+
+	CHANGE current_command CHARAT bfp current_command_index
+
+	IF EQU "+" current_command THEN
+		SETGROUP registers pointer_location ADD ACCESSGROUP registers pointer_location 1
+	ENDIF
+
+	IF EQU "-" current_command THEN
+		SETGROUP registers pointer_location SUB ACCESSGROUP registers pointer_location 1
+	ENDIF
+
+	IF EQU ">" current_command THEN
+		CHANGE pointer_location ADD pointer_location 1
+		IF GRE pointer_location number_of_registers THEN
+			CHANGE pointer_location number_of_registers
+		ENDIF
+	ENDIF
+
+	IF EQU "<" current_command THEN
+		CHANGE pointer_location SUB pointer_location 1
+		IF LESS pointer_location 1 THEN
+			CHANGE pointer_location 1
+		ENDIF
+	ENDIF
+
+	IF EQU "." current_command THEN
+		SAY TOASCII ACCESSGROUP registers pointer_location
+	ENDIF
+
+	CHANGE current_command_index ADD current_command_index 1
+
+ENDWHILE
+
+SAYLN ""

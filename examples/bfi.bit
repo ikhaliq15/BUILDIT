@@ -3,7 +3,7 @@ LET current_index 1
 LET word ""
 LET file_length LEN a
 
-LET number_of_registers 30000
+LET number_of_registers 2000
 NEWGROUP registers
 LET i 0
 WHILE LESS i number_of_registers DO
@@ -11,7 +11,8 @@ WHILE LESS i number_of_registers DO
 	CHANGE i ADD i 1
 ENDWHILE
 
-LET number_of_loops_allowed 10000
+
+LET number_of_loops_allowed 2000
 NEWGROUP looplocators
 CHANGE i 0
 WHILE LESS i number_of_loops_allowed DO
@@ -28,6 +29,7 @@ LET temp_for_looping_2 0
 LET current_register_location 1
 
 WHILE LEQU current_index file_length DO
+	
 	CHANGE word CHARAT a current_index
 	IF SEQU word "+" THEN
 		CHANGE temp_for_adding_1 ACCESSGROUP registers current_register_location

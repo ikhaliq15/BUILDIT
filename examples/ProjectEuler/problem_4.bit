@@ -23,6 +23,7 @@ CHANGE b ADD 999 0
 SETMARKER second
 CHANGE b SUB b 1
 
+
 CHANGE product MULT a b
 CHANGE product TOSTRING product
 CHANGE rev REVERSE product

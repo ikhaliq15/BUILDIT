@@ -21,7 +21,7 @@ WHILE NEQU guess num DO
 		SAY attempts_left
 		SAYLN " guesses remaining."
 	ENDIF
-	IF LESS attempts_left 2 THEN
+	IF LESS attempts_left 1 THEN
 		SAYLN ""
 		GOTOMARKER lose
 	ENDIF
